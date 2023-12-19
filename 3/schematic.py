@@ -3,16 +3,46 @@
 import re
 import sys
 
+symbol = re.compile(r'[!@#$%^&*\-+=_/]')
+digit  = re.compile(r'\d')
+
+def read_part_number(schematic, row, col):
+  start = end = col
+  for i in range(1, col+1):
+    if digit.match(schematic[row][col-i]) != None:
+      start -= 1
+    else:
+      break
+
+  for i in range(1, len(schematic[row])-col):
+    if digit.match(schematic[row][col + i]) != None:
+      end += 1
+    else:
+      break
+  
+  part = "".join(schematic[row][start:end+1])
+  schematic[row][start:end+1] = 'X' * len(part)
+  return int(part)
+
+def find_part_numbers(schematic, row, col):
+  parts = []
+  for i in range(-1, 2):
+    for j in range(-1, 2):
+      if col + j < 0 or col + j >= len(schematic[row]):
+        continue
+      if row + i >= 0 and row + i < len(schematic) and digit.match(schematic[row + i][col + j]) != None:
+        parts.append(read_part_number(schematic, row+i, col+j))
+  return parts
+
 schematic = []
-symbol = re.compile(r'[*$#+]')
 for line in sys.stdin.readlines():
-    schematic.append([*line.strip()])
+  schematic.append([*line])
 
-rows = len(schematic)
-cols = len(schematic[0])
-
-for i in range(0, rows):
-    for j in range(0, cols):
-        if symbol.match(schematic[i][j]):
-            print("Symbol at row " + str(i) + " and col " + str(j))
-
+parts = []
+for row in range(0, len(schematic)):
+  for col in range(0, len(schematic[row])):
+    if symbol.match(schematic[row][col]) != None:
+      parts += (find_part_numbers(schematic, row, col))
+print(sum(parts))
+for line in schematic:
+  print("".join(line).strip())
