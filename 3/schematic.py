@@ -44,5 +44,3 @@ for row in range(0, len(schematic)):
     if symbol.match(schematic[row][col]) != None:
       parts += (find_part_numbers(schematic, row, col))
 print(sum(parts))
-for line in schematic:
-  print("".join(line).strip())
