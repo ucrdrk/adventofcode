@@ -43,7 +43,7 @@ for start in range(0, len(needs_planting), 2):
             location = index
 
         if ((idx - seed) % 1000000) == 0:
-            print('=', end='')
+            print('=', end='', flush=True)
     print()
 
 print(location)
