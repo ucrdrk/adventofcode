@@ -28,9 +28,9 @@ for line in sys.stdin.readlines():
     if map_values_match != None:
         maps[curr_map].append(list(map(lambda x : int(x), map_values_match.group(1).split())))
 
-locations = set()
+location = sys.maxsize
 for start in range(0, len(needs_planting), 2):
-    print('Processing range ', start)
+    print('Processing range ', needs_planting[start], ' to ', (needs_planting[start] + needs_planting[start+1]))
     seed = needs_planting[start]
     for idx in range(seed, seed + needs_planting[start+1]):
         index = idx
@@ -39,6 +39,7 @@ for start in range(0, len(needs_planting), 2):
                 if index >= mapping[1] and index < mapping[1] + mapping[2]:
                     index = mapping[0] + (index - mapping[1])
                     break
-        locations.add(index)
+        if index < location: 
+            location = index
 
-print(min(locations))
+print(min(location))
