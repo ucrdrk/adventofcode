@@ -42,4 +42,4 @@ for start in range(0, len(needs_planting), 2):
         if index < location: 
             location = index
 
-print(min(location))
+print(location)
