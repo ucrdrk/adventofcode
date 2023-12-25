@@ -2,6 +2,7 @@
 
 import re
 import sys
+from multiprocessing import Process
 
 seeds = re.compile(r'^seeds:\s+((\d+\s*)*)$')
 map_to = re.compile(r'^(\w+\-to\-\w+)\s+map:\s*$')
@@ -10,6 +11,21 @@ maps = {}
 curr_map = ''
 
 needs_planting = []
+
+def find_location(min, max):
+    print('Processing range ', min, ' to ', max)
+    location = sys.maxsize
+    for idx in range(min, max):
+        index = idx
+        for map_key in maps:
+            for mapping in maps[map_key]:
+                if index >= mapping[1] and index < mapping[1] + mapping[2]:
+                    index = mapping[0] + (index - mapping[1])
+                    break
+        if index < location: 
+            location = index
+
+    print(location)
 
 for line in sys.stdin.readlines():
     line = line.strip()
@@ -28,22 +44,18 @@ for line in sys.stdin.readlines():
     if map_values_match != None:
         maps[curr_map].append(list(map(lambda x : int(x), map_values_match.group(1).split())))
 
-location = sys.maxsize
+
+threads = []
 for start in range(0, len(needs_planting), 2):
-    print('Processing range ', needs_planting[start], ' to ', (needs_planting[start] + needs_planting[start+1]))
     seed = needs_planting[start]
-    for idx in range(seed, seed + needs_planting[start+1]):
-        index = idx
-        for map_key in maps:
-            for mapping in maps[map_key]:
-                if index >= mapping[1] and index < mapping[1] + mapping[2]:
-                    index = mapping[0] + (index - mapping[1])
-                    break
-        if index < location: 
-            location = index
 
-        if ((idx - seed) % 1000000) == 0:
-            print('=', end='', flush=True)
-    print()
+    thread = Process(target=find_location, args=[seed, seed + needs_planting[start+1]])
+    threads.append(thread)
 
-print(location)
+for thread in threads:
+    thread.start()
+
+for thread in threads:
+    print('Waiting for thread...')
+    thread.join()
+
